@@ -23,8 +23,8 @@
         <div class="collapse navbar-collapse" id="bs-example-navbar-collapse-1">
           <ul class="nav navbar-nav">
             <!-- <li class="active"><a href="#">Home <span class="sr-only">(current)</span></a></li> -->
-            <li><a href="<?= base_url() ?>Obat/admin_home">Home</a></li>
-            <li><a href="<?= base_url() ?>Obat/user_home">User</a></li>
+            <li><a href="<?= base_url() ?>Obat/adminHome">Home</a></li>
+            <li><a href="<?= base_url() ?>Obat/userHome">User</a></li>
             <li class="dropdown">
               <a href="#" class="dropdown-toggle" data-toggle="dropdown" role="button" aria-haspopup="true" aria-expanded="false">Transaksi <span class="caret"></span></a>
               <ul class="dropdown-menu">
@@ -35,8 +35,8 @@
             <li class="dropdown">
               <a href="#" class="dropdown-toggle" data-toggle="dropdown" role="button" aria-haspopup="true" aria-expanded="false">Laporan <span class="caret"></span></a>
               <ul class="dropdown-menu">
-                <li><a href="<?= base_url() ?>Obat/lap_pembelian">Pembelian</a></li>
-                <li><a href="<?= base_url() ?>Obat/lap_penjualan">Penjualan</a></li>
+                <li><a href="<?= base_url() ?>Obat/lapPembelian">Pembelian</a></li>
+                <li><a href="<?= base_url() ?>Obat/lapPenjualan">Penjualan</a></li>
               </ul>
             </li>
           </ul>

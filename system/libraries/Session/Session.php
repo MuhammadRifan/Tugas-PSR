@@ -729,7 +729,7 @@ class CI_Session {
 	 *
 	 * @returns	array
 	 */
-	public function &get_userdata()
+	public function &getUserdata()
 	{
 		return $_SESSION;
 	}

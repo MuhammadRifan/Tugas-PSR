@@ -15,7 +15,7 @@
       <div class="header clearfix">
         <nav>
           <ul class="nav nav-pills pull-right">
-            <li role="presentation"><a href="<?= base_url() ?>Obat/home_page">Home</a></li>
+            <li role="presentation"><a href="<?= base_url() ?>Obat/homePage">Home</a></li>
             <li role="presentation"><a href="<?= base_url() ?>Obat/cart">Cart</a></li>
             <li role="presentation">
               <li class="dropdown">

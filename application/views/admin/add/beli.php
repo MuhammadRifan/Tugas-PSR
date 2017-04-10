@@ -1,12 +1,12 @@
 <div class="container">
   <div class="panel panel-primary">
     <div class="panel-heading">
-      <a href="admin_home" class="btn btn-info">Back</a>
+      <a href="adminHome" class="btn btn-info">Back</a>
       Tambah Stok Obat
     </div>
     <div class="panel-body">
       <?= validation_errors("<p style='color: red;'>", "</p>")  ?>
-      <form action="<?= base_url() ?>Obat/admin_add" method='post'>
+      <form action="<?= base_url() ?>Obat/adminAdd" method='post'>
         <div class="form-group">
           <label>Nama Obat</label>
           <input type="name" class="form-control" name="nama" placeholder="Nama Obat">

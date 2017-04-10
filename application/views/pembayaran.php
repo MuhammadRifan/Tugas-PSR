@@ -14,7 +14,7 @@
         <h1>Terima Kasih</h1>
       </div>
       <p class="lead">Semoga Lekas Sembuh</p>
-      <p>Back to <a href="<?= base_url() ?>Obat/home_page">Home Page</a></p>
+      <p>Back to <a href="<?= base_url() ?>Obat/homePage">Home Page</a></p>
     </div>
 
     <footer class="footer">
