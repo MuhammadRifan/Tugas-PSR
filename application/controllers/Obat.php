@@ -1,389 +1,397 @@
 <?php
-  defined('BASEPATH') OR exit('No direct script access allowed');
+defined('BASEPATH') or exit('No direct script access allowed');
 
-  class Obat extends CI_Controller{
-    function __construct() {
-      parent::__construct();
-      $this->load->database();
-      $this->load->library('form_validation');
-      $this->load->model('ModelObat', 'obat');
+class Obat extends CI_Controller
+{
+    public function __construct()
+    {
+        parent::__construct();
+        $this->load->database();
+        $this->load->library('form_validation');
+        $this->load->model('ModelObat', 'obat');
+
     }
 
-    function index()
+    public function index()
     {
-      $this->login();
+        $this->login();
     }
 
-    function login()
+    public function login()
     {
-      $submit = $this->input->post('submit');
+        $submit = $this->input->post('submit');
 
-      if ($submit == "Login") {
-        $this->form_validation->set_rules('nama', 'Nama User', 'required');
-        $this->form_validation->set_rules('pass', 'Password', 'required');
+        if ($submit == "Login") {
+            $this->form_validation->set_rules('nama', 'Nama User', 'required');
+            $this->form_validation->set_rules('pass', 'Password', 'required');
 
-        if ($this->form_validation->run()) {
+            if ($this->form_validation->run()) {
+                $nama = $this->input->post('nama');
+                $pass = md5($this->input->post('pass'));
+                $sql = $this->obat->login();
 
-          $nama = $this->input->post('nama');
-          $pass = md5($this->input->post('pass'));
-          $sql = $this->obat->login();
-
-          foreach ($sql as $key) {
-            if (($nama == $key->nama) && ($pass == $key->password)) {
-              if ($key->level == 1) {
-                $data = array(
-          				'is_logged_in' => 1
-                );
-                $this->session->set_userdata($data);
-                redirect('Obat/adminHome');
-              } elseif ($key->level == 0) {
-                $data = array(
-          				'is_logged_in' => 2
-                );
-                $this->session->set_userdata($data);
-                redirect('Obat/homePage');
-              }
+                foreach ($sql as $key) {
+                    if (($nama == $key->nama) && ($pass == $key->password)) {
+                        if ($key->level == 1) {
+                            $data = array(
+                                'is_logged_in' => 1
+                            );
+                            $this->session->set_userdata($data);
+                            redirect('Obat/adminHome');
+                        } elseif ($key->level == 0) {
+                            $data = array(
+                                'is_logged_in' => 2
+                            );
+                            $this->session->set_userdata($data);
+                            redirect('Obat/homePage');
+                        }
+                    }
+                }
+                echo "<p class='text-center' style='color: red;'>Nama atau Password Salah</p>";
             }
-          }
-          echo "<p class='text-center' style='color: red;'>Nama atau Password Salah</p>";
         }
-      }
-      $this->load->view('login');
+        $this->load->view('login');
     }
 
-    function register()
+    public function register()
     {
-      $submit = $this->input->post('submit');
+        $submit = $this->input->post('submit');
 
-      if ($submit == "Register") {
-        $this->form_validation->set_rules('nama', 'Nama User', 'required|is_unique[tbl_user.nama]');
-        $this->form_validation->set_rules('pass', 'Password', 'required');
-    		$this->form_validation->set_rules('passcon', 'Confirm Password', 'required|matches[pass]');
+        if ($submit == "Register") {
+            $this->form_validation->set_rules('nama', 'Nama User', 'required|is_unique[tbl_user.nama]');
+            $this->form_validation->set_rules('pass', 'Password', 'required');
+            $this->form_validation->set_rules('passcon', 'Confirm Password', 'required|matches[pass]');
 
-    		$this->form_validation->set_message('is_unique', "Maaf, nama sudah digunakan");
+            $this->form_validation->set_message('is_unique', "Maaf, nama sudah digunakan");
 
-        if ($this->form_validation->run()) {
-          $this->obat->register();
-          redirect('Obat/login');
+            if ($this->form_validation->run()) {
+                $this->obat->register();
+                redirect('Obat/login');
+            }
         }
-      }
-      $this->load->view('register');
+        $this->load->view('register');
     }
 
-    function adminHome()
+    public function adminHome()
     {
-      if ($this->session->userdata('is_logged_in') == 1) {
-        $data['db'] = $this->obat->selectObat();
-        $this->load->view('admin/template/header');
-        $this->load->view('admin/admin', $data);
-        $this->load->view('admin/template/footer');
-      } else {
-        redirect('Obat/login');
-      }
-    }
+        if ($this->session->userdata('is_logged_in') == 1) {
+            $data['db'] = $this->obat->selectObat();
 
-    function adminAdd()
-    {
-      $submit = $this->input->post('submit');
-
-      if ($submit == "Submit") {
-        $this->form_validation->set_rules('nama', 'Nama Obat', 'required');
-        $this->form_validation->set_rules('fungsi', 'Fungsi Obat', 'required');
-        $this->form_validation->set_rules('tgl_beli', 'Tanggal Pembelian', 'required');
-        $this->form_validation->set_rules('nomor', 'Nomor Faktur', 'required');
-        $this->form_validation->set_rules('jumlah', 'Jumlah Obat', 'required|numeric');
-        $this->form_validation->set_rules('hbeli', 'Harga Beli Obat', 'required|numeric');
-        $this->form_validation->set_rules('hjual', 'Harga Jual Obat', 'required|numeric');
-
-        $nama = $this->input->post('nama');
-
-        if ($this->form_validation->run()) {
-          $num_rows = $this->obat->cek($nama);
-          if ($num_rows == 1) {
-            $this->obat->updateStok($nama);
-          } else {
-            $this->obat->insertObat();
-          }
-          $this->obat->pembelian($nama);
-
-          redirect('Obat/adminHome');
+            $this->load->view('admin/template/header');
+            $this->load->view('admin/admin', $data);
+            $this->load->view('admin/template/footer');
+        } else {
+            redirect('Obat/login');
         }
-      }
-
-      if ($this->session->userdata('is_logged_in') == 1) {
-        $this->load->view('admin/template/header');
-        $this->load->view('admin/add/beli');
-        $this->load->view('admin/template/footer');
-      } else {
-        redirect('Obat/login');
-      }
     }
 
-    function adminEdit($id)
+    public function adminAdd()
     {
-      $submit = $this->input->post('submit');
+        $submit = $this->input->post('submit');
 
-      if ($submit == "Submit") {
-        $this->form_validation->set_rules('nama', 'Nama Obat', 'required');
-        $this->form_validation->set_rules('fungsi', 'Fungsi Obat', 'required');
-        $this->form_validation->set_rules('stok', 'Stok', 'required|numeric');
-        $this->form_validation->set_rules('harga', 'Harga Obat', 'required|numeric');
+        if ($submit == "Submit") {
+            $this->form_validation->set_rules('nama', 'Nama Obat', 'required');
+            $this->form_validation->set_rules('fungsi', 'Fungsi Obat', 'required');
+            $this->form_validation->set_rules('tgl_beli', 'Tanggal Pembelian', 'required');
+            $this->form_validation->set_rules('nomor', 'Nomor Faktur', 'required');
+            $this->form_validation->set_rules('jumlah', 'Jumlah Obat', 'required|numeric');
+            $this->form_validation->set_rules('hbeli', 'Harga Beli Obat', 'required|numeric');
+            $this->form_validation->set_rules('hjual', 'Harga Jual Obat', 'required|numeric');
 
-        $nama = $this->input->post('nama');
+            $nama = $this->input->post('nama');
 
-        if ($this->form_validation->run()) {
-          $this->obat->updateObat($id);
-          redirect('Obat/adminHome');
-        }
-      }
-
-      if ($this->session->userdata('is_logged_in') == 1) {
-        $data['db'] = $this->obat->getEdit($id);
-        $this->load->view('admin/template/header');
-        $this->load->view('admin/edit/edit', $data);
-        $this->load->view('admin/template/footer');
-      } else {
-        redirect('Obat/login');
-      }
-    }
-
-    function adminHapus($id)
-    {
-      $this->obat->deleteObat($id);
-      redirect('Obat/adminHome');
-    }
-
-    function userHome()
-    {
-      if ($this->session->userdata('is_logged_in') == 1) {
-        $data['db'] = $this->obat->selectUser();
-        $this->load->view('admin/template/header');
-        $this->load->view('admin/user', $data);
-        $this->load->view('admin/template/footer');
-      } else {
-        redirect('Obat/login');
-      }
-    }
-
-    function userAdd()
-    {
-      $submit = $this->input->post('submit');
-
-      if ($submit == "Submit") {
-        $this->form_validation->set_rules('nama', 'Nama User', 'required|is_unique[tbl_user.nama]');
-        $this->form_validation->set_rules('pass', 'Password', 'required');
-    		$this->form_validation->set_rules('passcon', 'Confirm Password', 'required|matches[pass]');
-        $this->form_validation->set_rules('level', 'Level', 'required');
-
-    		$this->form_validation->set_message('is_unique', "Maaf, nama sudah digunakan");
-
-        if ($this->form_validation->run()) {
-          $this->obat->insertUser();
-          redirect('Obat/userHome');
-        }
-      }
-
-      if ($this->session->userdata('is_logged_in') == 1) {
-        $this->load->view('admin/template/header');
-        $this->load->view('admin/add/userAdd');
-        $this->load->view('admin/template/footer');
-      } else {
-        redirect('Obat/login');
-      }
-    }
-
-    function userHapus($id)
-    {
-      $this->obat->deleteUser($id);
-      redirect('Obat/userHome');
-    }
-
-    function userEdit($id)
-    {
-      $submit = $this->input->post('submit');
-
-      if ($submit == "Submit") {
-        $this->form_validation->set_rules('nama', 'Nama', 'required');
-        if (!empty($this->input->post('passold')) || !empty($this->input->post('passnew')) || !empty($this->input->post('passcon'))) {
-          $this->form_validation->set_rules('pass', 'Database', 'trim');
-          $this->form_validation->set_rules('passold', 'Password Lama', 'trim|md5|required|matches[pass]');
-          $this->form_validation->set_rules('passnew', 'Password Baru', 'trim|required');
-          $this->form_validation->set_rules('passcon', 'Confirm Password', 'trim|required|matches[passnew]');
+            if ($this->form_validation->run()) {
+                $num_rows = $this->obat->cek($nama);
+                if ($num_rows == 1) {
+                    $this->obat->updateStok($nama);
+                } else {
+                    $this->obat->insertObat();
+                }
+                $this->obat->pembelian($nama);
+                redirect('Obat/adminHome');
+            }
         }
 
-        if ($this->form_validation->run()) {
-          $this->obat->updateUser($id);
-          redirect('Obat/userHome');
+        if ($this->session->userdata('is_logged_in') == 1) {
+            $this->load->view('admin/template/header');
+            $this->load->view('admin/add/beli');
+            $this->load->view('admin/template/footer');
+        } else {
+            redirect('Obat/login');
         }
-      }
-
-      if ($this->session->userdata('is_logged_in') == 1) {
-        $data['db'] = $this->obat->getUser($id);
-        $this->load->view('admin/template/header');
-        $this->load->view('admin/edit/userEdit', $data);
-        $this->load->view('admin/template/footer');
-      } else {
-        redirect('Obat/login');
-      }
     }
 
-    function lapPembelian()
+    public function adminEdit($id)
     {
-      if ($this->session->userdata('is_logged_in') == 1) {
-        $data['db'] = $this->obat->selectLapBeli();
+        $submit = $this->input->post('submit');
 
-        $this->load->view('admin/template/header');
-        $this->load->view('admin/laporan/lapPembelian', $data);
-        $this->load->view('admin/template/footer');
-      } else {
-        redirect('Obat/login');
-      }
-    }
+        if ($submit == "Submit") {
+            $this->form_validation->set_rules('nama', 'Nama Obat', 'required');
+            $this->form_validation->set_rules('fungsi', 'Fungsi Obat', 'required');
+            $this->form_validation->set_rules('stok', 'Stok', 'required|numeric');
+            $this->form_validation->set_rules('harga', 'Harga Obat', 'required|numeric');
 
-    function lapPenjualan()
-    {
-      if ($this->session->userdata('is_logged_in') == 1) {
-        $data['db'] = $this->obat->selectLapJual();
+            $nama = $this->input->post('nama');
 
-        $this->load->view('admin/template/header');
-        $this->load->view('admin/laporan/lapPenjualan', $data);
-        $this->load->view('admin/template/footer');
-      } else {
-        redirect('Obat/login');
-      }
-    }
-
-    function pembelian()
-    {
-      if ($this->session->userdata('is_logged_in') == 1) {
-        $data['db'] = $this->obat->selectBeli();
-
-        $this->load->view('admin/template/header');
-        $this->load->view('admin/transaksi/pembelian', $data);
-        $this->load->view('admin/template/footer');
-      } else {
-        redirect('Obat/login');
-      }
-    }
-
-    function penjualan()
-    {
-      if ($this->session->userdata('is_logged_in') == 1) {
-        $data['db'] = $this->obat->selectJual();
-
-        $this->load->view('admin/template/header');
-        $this->load->view('admin/transaksi/penjualan', $data);
-        $this->load->view('admin/template/footer');
-      } else {
-        redirect('Obat/login');
-      }
-    }
-
-    function homePage()
-    {
-      if ($this->session->userdata('is_logged_in') == 2) {
-        $data['db'] = $this->obat->selectObat();
-        $this->load->view('template/header');
-        $this->load->view('homePage', $data);
-        $this->load->view('template/footer');
-      } else {
-        redirect('Obat/login');
-      }
-    }
-
-    function cart()
-    {
-      if ($this->session->userdata('is_logged_in') == 2) {
-        $id = $this->input->post('id');
-
-        if (empty($this->session->userdata('id'.$id))) {
-          $data = array(
-            'id'.$id => $id,
-            'nama'.$id => $this->input->post('nama'),
-            'jumlah'.$id => $this->input->post('jumlah'),
-            'harga'.$id => $this->input->post('harga'),
-            'htotal'.$id => $this->input->post('harga') * $this->input->post('jumlah')
-          );
-        } elseif (!empty($this->session->userdata('id'.$id))) {
-          $data = array(
-            'jumlah'.$id => $this->input->post('jumlah') + $this->session->userdata('jumlah'.$id),
-            'htotal'.$id => $this->input->post('harga') + $this->session->userdata('htotal'.$id)
-          );
+            if ($this->form_validation->run()) {
+                $this->obat->updateObat($id);
+                redirect('Obat/adminHome');
+            }
         }
 
-        $this->session->set_userdata($data);
-
-        $data = array(
-          'db' => $this->obat->selectObat(),
-          'num' => $this->obat->getNumRows()
-        );
-
-        $this->load->view('template/header');
-        $this->load->view('cart', $data);
-        $this->load->view('template/footer');
-      } else {
-        redirect('Obat/login');
-      }
+        if ($this->session->userdata('is_logged_in') == 1) {
+            $data['db'] = $this->obat->getEdit($id);
+            $this->load->view('admin/template/header');
+            $this->load->view('admin/edit/edit', $data);
+            $this->load->view('admin/template/footer');
+        } else {
+            redirect('Obat/login');
+        }
     }
 
-    function ubahCart($id)
+    public function adminHapus($id)
     {
-      if ($this->session->userdata('is_logged_in') == 2) {
-        $data = array(
-          'jumlah'.$id => $this->input->post('jumlah'),
-          'htotal'.$id => $this->session->userdata('harga'.$id) * $this->input->post('jumlah')
-        );
-        $this->session->set_userdata($data);
-        redirect('Obat/cart');
-      } else {
-        redirect('Obat/login');
-      }
+        $this->obat->deleteObat($id);
+        redirect('Obat/adminHome');
     }
 
-    function actdel($id)
+    public function userHome()
     {
-      if ($this->session->userdata('is_logged_in') == 2) {
-        $this->session->unset_userdata('id'.$id);
-        $this->session->unset_userdata('nama'.$id);
-        $this->session->unset_userdata('harga'.$id);
-        $this->session->unset_userdata('jumlah'.$id);
-        $this->session->unset_userdata('htotal'.$id);
-        redirect('Obat/cart');
-      } else {
-        redirect('Obat/login');
-      }
+        if ($this->session->userdata('is_logged_in') == 1) {
+            $data['db'] = $this->obat->selectUser();
+
+            $this->load->view('admin/template/header');
+            $this->load->view('admin/user', $data);
+            $this->load->view('admin/template/footer');
+        } else {
+            redirect('Obat/login');
+        }
     }
 
-    function pembayaran()
+    public function userAdd()
     {
-      if ($this->session->userdata('is_logged_in') == 2) {
-        $num_rows = $this->obat->getNumRows();
-        for($i = 1; $i <= $num_rows; $i ++) {
-          $id = $this->session->userdata('id'.$i);
-          if ($id == $i) {
+        $submit = $this->input->post('submit');
+
+        if ($submit == "Submit") {
+            $this->form_validation->set_rules('nama', 'Nama User', 'required|is_unique[tbl_user.nama]');
+            $this->form_validation->set_rules('pass', 'Password', 'required');
+            $this->form_validation->set_rules('passcon', 'Confirm Password', 'required|matches[pass]');
+            $this->form_validation->set_rules('level', 'Level', 'required');
+
+            $this->form_validation->set_message('is_unique', "Maaf, nama sudah digunakan");
+
+            if ($this->form_validation->run()) {
+                $this->obat->insertUser();
+                redirect('Obat/userHome');
+            }
+        }
+
+        if ($this->session->userdata('is_logged_in') == 1) {
+            $this->load->view('admin/template/header');
+            $this->load->view('admin/add/userAdd');
+            $this->load->view('admin/template/footer');
+        } else {
+            redirect('Obat/login');
+        }
+    }
+
+    public function userHapus($id)
+    {
+        $this->obat->deleteUser($id);
+        redirect('Obat/userHome');
+    }
+
+    public function userEdit($id)
+    {
+        $submit = $this->input->post('submit');
+
+        if ($submit == "Submit") {
+            $this->form_validation->set_rules('nama', 'Nama', 'required');
+
+            $passold = $this->input->post('passold');
+            $passnew = $this->input->post('passnew');
+            $passcon = $this->input->post('passcon');
+
+            if (!empty($passold) || !empty($passnew) || !empty($passcon)) {
+                $this->form_validation->set_rules('pass', 'Database', 'trim');
+                $this->form_validation->set_rules('passold', 'Password Lama', 'trim|md5|required|matches[pass]');
+                $this->form_validation->set_rules('passnew', 'Password Baru', 'trim|required');
+                $this->form_validation->set_rules('passcon', 'Confirm Password', 'trim|required|matches[passnew]');
+            }
+
+            if ($this->form_validation->run()) {
+                $this->obat->updateUser($id);
+                redirect('Obat/userHome');
+            }
+        }
+
+        if ($this->session->userdata('is_logged_in') == 1) {
+            $data['db'] = $this->obat->getUser($id);
+            $this->load->view('admin/template/header');
+            $this->load->view('admin/edit/userEdit', $data);
+            $this->load->view('admin/template/footer');
+        } else {
+            redirect('Obat/login');
+        }
+    }
+
+    public function lapPembelian()
+    {
+        if ($this->session->userdata('is_logged_in') == 1) {
+            $data['db'] = $this->obat->selectLapBeli();
+
+            $this->load->view('admin/template/header');
+            $this->load->view('admin/laporan/lapPembelian', $data);
+            $this->load->view('admin/template/footer');
+        } else {
+            redirect('Obat/login');
+        }
+    }
+
+    public function lapPenjualan()
+    {
+        if ($this->session->userdata('is_logged_in') == 1) {
+            $data['db'] = $this->obat->selectLapJual();
+
+            $this->load->view('admin/template/header');
+            $this->load->view('admin/laporan/lapPenjualan', $data);
+            $this->load->view('admin/template/footer');
+        } else {
+            redirect('Obat/login');
+        }
+    }
+
+    public function pembelian()
+    {
+        if ($this->session->userdata('is_logged_in') == 1) {
+            $data['db'] = $this->obat->selectBeli();
+
+            $this->load->view('admin/template/header');
+            $this->load->view('admin/transaksi/pembelian', $data);
+            $this->load->view('admin/template/footer');
+        } else {
+            redirect('Obat/login');
+        }
+    }
+
+    public function penjualan()
+    {
+        if ($this->session->userdata('is_logged_in') == 1) {
+            $data['db'] = $this->obat->selectJual();
+
+            $this->load->view('admin/template/header');
+            $this->load->view('admin/transaksi/penjualan', $data);
+            $this->load->view('admin/template/footer');
+        } else {
+            redirect('Obat/login');
+        }
+    }
+
+    public function homePage()
+    {
+        if ($this->session->userdata('is_logged_in') == 2) {
+            $data['db'] = $this->obat->selectObat();
+
+            $this->load->view('template/header');
+            $this->load->view('homePage', $data);
+            $this->load->view('template/footer');
+        } else {
+            redirect('Obat/login');
+        }
+    }
+
+    public function cart()
+    {
+        if ($this->session->userdata('is_logged_in') == 2) {
+            $id = $this->input->post('id');
+
+            if (empty($this->session->userdata('id'.$id))) {
+                $data = array(
+                    'id'.$id => $id,
+                    'nama'.$id => $this->input->post('nama'),
+                    'jumlah'.$id => $this->input->post('jumlah'),
+                    'harga'.$id => $this->input->post('harga'),
+                    'htotal'.$id => $this->input->post('harga') * $this->input->post('jumlah')
+                );
+            } elseif (!empty($this->session->userdata('id'.$id))) {
+                $data = array(
+                    'jumlah'.$id => $this->input->post('jumlah') + $this->session->userdata('jumlah'.$id),
+                    'htotal'.$id => $this->input->post('harga') + $this->session->userdata('htotal'.$id)
+                );
+            }
+
+            $this->session->set_userdata($data);
             $data = array(
-              'nama' => $this->session->userdata('nama'.$i),
-              'id' => $this->session->userdata('id'.$i)
+                'db' => $this->obat->selectObat(),
+                'num' => $this->obat->getNumRows()
             );
-            $this->obat->stokJual($data);
-            $this->obat->penjualan($id);
-          }
-          $this->session->unset_userdata('id'.$id);
-          $this->session->unset_userdata('nama'.$id);
-          $this->session->unset_userdata('harga'.$id);
-          $this->session->unset_userdata('jumlah'.$id);
-          $this->session->unset_userdata('htotal'.$id);
+            $this->load->view('template/header');
+            $this->load->view('cart', $data);
+            $this->load->view('template/footer');
+        } else {
+            redirect('Obat/login');
         }
-        $this->load->view('pembayaran');
-      } else {
-        redirect('Obat/login');
-      }
     }
 
-    function logout()
+    public function ubahCart($id)
     {
-      $this->session->sess_destroy();
-      redirect('Obat/login');
+        if ($this->session->userdata('is_logged_in') == 2) {
+            $data = array(
+                'jumlah'.$id => $this->input->post('jumlah'),
+                'htotal'.$id => $this->session->userdata('harga'.$id) * $this->input->post('jumlah')
+            );
+            $this->session->set_userdata($data);
+            redirect('Obat/cart');
+        } else {
+            redirect('Obat/login');
+        }
     }
 
-  }
+    public function actdel($id)
+    {
+        if ($this->session->userdata('is_logged_in') == 2) {
+            $this->session->unset_userdata('id'.$id);
+            $this->session->unset_userdata('nama'.$id);
+            $this->session->unset_userdata('harga'.$id);
+            $this->session->unset_userdata('jumlah'.$id);
+            $this->session->unset_userdata('htotal'.$id);
+            redirect('Obat/cart');
+        } else {
+            redirect('Obat/login');
+        }
+    }
+
+    public function pembayaran()
+    {
+        if ($this->session->userdata('is_logged_in') == 2) {
+            $num_rows = $this->obat->getNumRows();
+
+            for ($i = 1; $i <= $num_rows; $i ++) {
+                $id = $this->session->userdata('id'.$i);
+
+                if ($id == $i) {
+                    $data = array(
+                        'nama' => $this->session->userdata('nama'.$i),
+                        'id' => $this->session->userdata('id'.$i)
+                    );
+                    $this->obat->stokJual($data);
+                    $this->obat->penjualan($id);
+                }
+                $this->session->unset_userdata('id'.$id);
+                $this->session->unset_userdata('nama'.$id);
+                $this->session->unset_userdata('harga'.$id);
+                $this->session->unset_userdata('jumlah'.$id);
+                $this->session->unset_userdata('htotal'.$id);
+            }
+            $this->load->view('pembayaran');
+        } else {
+            redirect('Obat/login');
+        }
+    }
+
+    public function logout()
+    {
+        $this->session->sess_destroy();
+        redirect('Obat/login');
+    }
+}

@@ -93,7 +93,7 @@ $browsers = array(
 $mobiles = array(
 	// legacy array, old values commented out
 	'mobileexplorer'	=> 'Mobile Explorer',
-//  'openwave'			=> 'Open Wave',
+//    'openwave'			=> 'Open Wave',
 //	'opera mini'		=> 'Opera Mini',
 //	'operamini'			=> 'Opera Mini',
 //	'elaine'			=> 'Palm',
@@ -134,7 +134,7 @@ $mobiles = array(
 	'mot-'			=> 'Motorola',
 	'playstation portable'	=> 'PlayStation Portable',
 	'playstation 3'		=> 'PlayStation 3',
-	'playstation vita'  	=> 'PlayStation Vita',
+	'playstation vita'    	=> 'PlayStation Vita',
 	'hiptop'		=> 'Danger Hiptop',
 	'nec-'			=> 'NEC',
 	'panasonic'		=> 'Panasonic',
